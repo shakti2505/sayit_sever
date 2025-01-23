@@ -33,7 +33,7 @@ export const googleLogin = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: true,
-      sameSite: true,
+      sameSite: 'None',
       maxAge: maxAge * 5000,
     });
 
