@@ -1,3 +1,4 @@
+import ChatGroupModal from "../modals/chatGroupModal.js";
 import GroupUsersModal from "../modals/groupUsersModal.js";
 
 // get All group users by group_id
@@ -21,13 +22,25 @@ export const getGroupUsers = async (req, res) => {
 
 export const storeUsersInGroup = async (req, res) => {
   try {
-    const { name, chatgroup, user_id } = req.body;
+    const { name, group_id, user_id, key } = req.body;
+    // check if user is already a group memeber.
+    const IsMember = await GroupUsersModal.findOne({ user_id: user_id, chatgroup:group_id });
+    console.log(IsMember);
+    if (IsMember) {
+      return res.status(200).json({ message: "User already a group member." });
+    }
+
     const user = await GroupUsersModal.create({
       name,
-      chatgroup,
+      chatgroup: group_id,
       user_id,
     });
-    console.log(user);
+
+    // adding user id and public key of the user in the group memebers details
+    await ChatGroupModal.findByIdAndUpdate(group_id, {
+      members: [{ member_id: user_id, publicKey: key }],
+    });
+
     return res
       .status(200)
       .json({ message: "User added Successfully in group.", data: user });

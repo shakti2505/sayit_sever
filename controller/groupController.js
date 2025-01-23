@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import ChatGroupModal from "../modals/chatGroupModal.js";
 
 // create group
@@ -5,19 +7,20 @@ export const createGroup = async (req, res) => {
   try {
     const body = req.body;
     const user = req.user;
-   const group=  await ChatGroupModal.create({
+    const group = await ChatGroupModal.create({
       name: body.name,
       passcode: body.passcode,
       group_admin: user._id,
       members: [{ member_id: user._id, publicKey: body.key }],
     });
-    return res.status(201).json({ message: "Group created successfully", data:group });
+    return res
+      .status(201)
+      .json({ message: "Group created successfully", data: group });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
-
 
 // get all grouo created by user
 export const getAllGroupOfUser = async (req, res) => {
@@ -90,7 +93,7 @@ export const generate_group_link = (req, res) => {
       return res.status(400).json({ message: "Group Id is not found" });
     }
 
-    const baseURL = "http://localhost:5173/chats";
+    const baseURL = `${process.env.CLIENT_URL}/chat`;
     const uniqueLink = `${baseURL}/${group_id}`;
     return res.status(201).json({ link: uniqueLink });
   } catch (error) {
