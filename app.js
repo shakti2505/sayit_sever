@@ -21,18 +21,22 @@ connectDB(DB_URL);
 const app = express();
 
 // middle ware
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://just-sayit.netlify.app",
+];
 app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin
-      // (like mobile apps or curl requests)
+      console.log("Incoming request from origin:", origin); // Log the origin
+
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         var msg =
           "The CORS policy for this site does not " +
           "allow access from the specified Origin.";
+        console.error(msg, "Origin:", origin); // Log the error
         return callback(new Error(msg), false);
       }
       return callback(null, true);
@@ -40,6 +44,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 const server = http.createServer(app);
