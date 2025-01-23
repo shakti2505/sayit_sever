@@ -23,10 +23,10 @@ const groupChatSchema = new mongoose.Schema({
     required: true,
     default:false
   },
-  createdAt: {
-    type: Date,
-    default: new Date(),
-  },
+    createdAt: {
+      type: Date,
+      default: new Date(),
+    },
 });
 
 groupChatSchema.index({ createdAt: 1 });

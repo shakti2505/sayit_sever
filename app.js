@@ -11,7 +11,7 @@ import "./modals/userModal.js";
 import { Server } from "socket.io";
 import { setUpSocket } from "./middleware/socket.js";
 import { createAdapter } from "@socket.io/redis-streams-adapter";
-import redisClient from './utils/redis.config.js'
+import redisClient from "./utils/redis.config.js";
 
 // connecting to DB
 const DB_URL = process.env.DB_URL;
@@ -47,7 +47,7 @@ const server = http.createServer(app);
 //setting up socket.io
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"], // allow to localhost only
+    origin: ["http://localhost:5173", "https://just-sayit.netlify.app"],
     credentials: true,
   },
   adapter: createAdapter(redisClient),
@@ -56,9 +56,9 @@ setUpSocket(io);
 export { io };
 
 const PORT = process.env.PORT || 8080;
-app.use('/', (req, res)=>{
+app.use("/", (req, res) => {
   return res.send("hello Shakti");
-})
+});
 app.use("/auth", authRouter);
 app.use("/api", groupRouter);
 
