@@ -61,9 +61,7 @@ setUpSocket(io);
 export { io };
 
 const PORT = process.env.PORT || 8080;
-app.use("/", (req, res) => {
-  return res.send("hello Shakti");
-});
+
 app.use("/auth", authRouter);
 app.use("/api", groupRouter);
 
