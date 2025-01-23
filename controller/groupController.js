@@ -93,7 +93,7 @@ export const generate_group_link = (req, res) => {
       return res.status(400).json({ message: "Group Id is not found" });
     }
 
-    const baseURL = `${process.env.CLIENT_URL}/chat`;
+    const baseURL = `${process.env.CLIENT_UR}/chat`;
     const uniqueLink = `${baseURL}/${group_id}`;
     return res.status(201).json({ link: uniqueLink });
   } catch (error) {
