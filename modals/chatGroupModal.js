@@ -2,6 +2,18 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import User from "./userModal.js";
 
+const memberSchema = new mongoose.Schema({
+  member_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User,
+    required: true,
+  },
+  publicKey: {
+    type: String,
+    required: true,
+  },
+});
+
 const chatGroup = new mongoose.Schema({
   name: {
     type: String,
@@ -18,10 +30,10 @@ const chatGroup = new mongoose.Schema({
     minLength: 6,
   },
   members: {
-    type: Array,
+    type: [memberSchema], // Use an array of subdocuments
     default: [],
     required: true,
-  },
+  },  
   createdAt: {
     type: Date,
     default: new Date(),
