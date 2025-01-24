@@ -26,9 +26,13 @@ export const createGroup = async (req, res) => {
 export const getAllGroupOfUser = async (req, res) => {
   try {
     const user = req.user;
-    const groups = await ChatGroupModal.find({ group_admin: user._id }).sort({
-      createdAt: -1,
+    // const groups = await ChatGroupModal.find({ group_admin: user._id }).sort({
+    //   createdAt: -1,
+    // });
+    const groups = await ChatGroupModal.find({
+      "members.member_id": user._id,
     });
+
     return res
       .status(200)
       .json({ message: "Chat Groups fetched successfully", groups: groups });

@@ -23,11 +23,13 @@ export const getGroupUsers = async (req, res) => {
 export const storeUsersInGroup = async (req, res) => {
   try {
     const { name, group_id, user_id, key } = req.body;
+    console.log(key);
     // check if user is already a group memeber.
     const IsMember = await GroupUsersModal.findOne({
       user_id: user_id,
       chatgroup: group_id,
     });
+
     if (IsMember) {
       return res.status(200).json({ message: "User already a group member." });
     }
@@ -40,7 +42,9 @@ export const storeUsersInGroup = async (req, res) => {
     if (key != null) {
       // adding user id and public key of the user in the group memebers details
       await ChatGroupModal.findByIdAndUpdate(group_id, {
-        members: [{ member_id: user_id, publicKey: key }],
+        $push: {
+          members: { member_id: user_id, publicKey: key },
+        },
       });
     }
 
