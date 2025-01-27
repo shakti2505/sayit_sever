@@ -12,7 +12,7 @@ import {
   getGroupUsers,
   storeUsersInGroup,
 } from "../controller/chatGroupUserController.js";
-import { getGroupChats } from "../controller/chatsController.js";
+import { getGroupChats, searchMessgesInGroup } from "../controller/chatsController.js";
 
 const router = express.Router();
 
@@ -45,4 +45,8 @@ router.get("/get-group-chats/:group_id", getGroupChats);
 
 // generate link route
 router.post('/generate-group-link/:group_id', generate_group_link);
+
+
+// search messges in group route
+router.get('/search-messages', searchMessgesInGroup);
 export default router;
