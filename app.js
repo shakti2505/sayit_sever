@@ -6,6 +6,7 @@ import http from "http";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/authRoutes.js";
 import groupRouter from "./routes/groupRoutes.js";
+import contactRouter from "./routes/contactRoutes.js";
 import connectDB from "./DB/connectDB.js";
 import "./modals/userModal.js";
 import { Server } from "socket.io";
@@ -64,6 +65,7 @@ const PORT = process.env.PORT || 8080;
 
 app.use("/auth", authRouter);
 app.use("/api", groupRouter);
+app.use("/api", contactRouter);
 
 server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);

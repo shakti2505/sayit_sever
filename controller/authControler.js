@@ -33,7 +33,7 @@ export const googleLogin = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'None',
+      sameSite: "None",
       maxAge: maxAge * 5000,
     });
 
@@ -43,11 +43,4 @@ export const googleLogin = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Internal Server error" });
   }
-};
-
-// save public keys
-
-const saveUserPublicKey = () => {
-  try {
-  } catch (error) {}
 };

@@ -3,7 +3,16 @@ import groupChatModal from "../modals/groupChatModal.js";
 export const getGroupChats = async (req, res) => {
   try {
     const { group_id } = req.params;
-    const chats = await groupChatModal.find({ group_id: group_id });
+    const chats = await groupChatModal.aggregate([
+      { $match: { group_id: group_id } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          messages: { $push: "$$ROOT" }, // Push all messages of that date
+        },
+      },
+      { $sort: { _id: 1 } }, // Sort by date
+    ]);
     return res.status(200).json({ message: "chats found", data: chats });
   } catch (error) {
     console.log(error);
@@ -14,7 +23,7 @@ export const getGroupChats = async (req, res) => {
 // search messges in group
 export const searchMessgesInGroup = async (req, res) => {
   try {
-    const {group_id, queryMessage, page = 1, limit = 20 } = req.query;
+    const { group_id, queryMessage, page = 1, limit = 20 } = req.query;
 
     // validate query
     if (!queryMessage) {
