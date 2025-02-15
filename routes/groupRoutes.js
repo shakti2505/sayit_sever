@@ -17,8 +17,12 @@ import { getGroupChats, searchMessgesInGroup } from "../controller/chatsControll
 const router = express.Router();
 
 // chat group route
+// router.post("/create-chat-group", authMiddleware, (req, res) => createGroup(req, res, req.io));
+
 
 router.post("/create-chat-group", authMiddleware, createGroup);
+
+
 
 // getAllGroupOfUser
 
@@ -49,4 +53,5 @@ router.post('/generate-group-link/:group_id', generate_group_link);
 
 // search messges in group route
 router.get('/search-messages', searchMessgesInGroup);
+
 export default router;

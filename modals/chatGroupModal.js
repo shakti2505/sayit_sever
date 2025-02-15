@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 import User from "./userModal.js";
+import UserModal from "./userModal.js";
 
 const memberSchema = new mongoose.Schema({
   member_id: {
@@ -8,9 +8,29 @@ const memberSchema = new mongoose.Schema({
     ref: User,
     required: true,
   },
+  member_name: {
+    type: String,
+    required: true,
+  },
+  member_image: {
+    type: String,
+  },
   publicKey: {
     type: String,
     required: true,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const encryptAESKeyForGroupSchema = new mongoose.Schema({
+  user_id: {
+    type: String,
+  },
+  encryptedAESKey: {
+    type: String,
   },
 });
 
@@ -20,7 +40,7 @@ const chatGroup = new mongoose.Schema({
     required: true,
   },
   group_admin: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: User,
     required: true,
   },
@@ -29,11 +49,18 @@ const chatGroup = new mongoose.Schema({
     required: true,
     minLength: 6,
   },
+  group_picture: {
+    type: String,
+  },
   members: {
     type: [memberSchema], // Use an array of subdocuments
     default: [],
     required: true,
-  },  
+  },
+  encryptAESKeyForGroup: {
+    type: [encryptAESKeyForGroupSchema],
+    default: [],
+  },
   createdAt: {
     type: Date,
     default: new Date(),

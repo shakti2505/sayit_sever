@@ -3,8 +3,7 @@ import UserModal from "./userModal.js";
 
 const groupChatSchema = new mongoose.Schema({
   sender_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: UserModal,
+    type: String,
     required: true,
   },
   group_id: {
@@ -12,21 +11,22 @@ const groupChatSchema = new mongoose.Schema({
     required: true,
   },
   message: String,
+  iv: String,
   name: String,
   isRead: {
     type: Boolean,
     required: true,
-    default:false,
+    default: false,
   },
   isReceived: {
     type: Boolean,
     required: true,
-    default:false
+    default: false,
   },
-    createdAt: {
-      type: Date,
-      default: new Date(),
-    },
+  createdAt: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 groupChatSchema.index({ createdAt: 1 });

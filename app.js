@@ -63,6 +63,12 @@ export { io };
 
 const PORT = process.env.PORT || 8080;
 
+// passing io to the routes
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use("/auth", authRouter);
 app.use("/api", groupRouter);
 app.use("/api", contactRouter);

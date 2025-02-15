@@ -13,6 +13,7 @@ export const getGroupChats = async (req, res) => {
       },
       { $sort: { _id: 1 } }, // Sort by date
     ]);
+   
     return res.status(200).json({ message: "chats found", data: chats });
   } catch (error) {
     console.log(error);
@@ -41,7 +42,7 @@ export const searchMessgesInGroup = async (req, res) => {
     const messages = await groupChatModal
 
       .find(filter)
-      .select("createdAt isReceived isRead message _id")
+      .select("createdAt isReceived isRead message _id iv")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit)); // Limit the number of result per page

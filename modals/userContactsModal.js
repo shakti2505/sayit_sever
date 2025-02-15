@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import UserModal from "./userModal.js";
 
 const UserContactSschema = new mongoose.Schema({

@@ -2,7 +2,6 @@ import ChatGroupModal from "../modals/chatGroupModal.js";
 import GroupUsersModal from "../modals/groupUsersModal.js";
 
 // get All group users by group_id
-
 export const getGroupUsers = async (req, res) => {
   try {
     const { group_id } = req.params;
@@ -18,8 +17,8 @@ export const getGroupUsers = async (req, res) => {
   }
 };
 
-// store user in group
 
+// store user in group
 export const storeUsersInGroup = async (req, res) => {
   try {
     const { name, group_id, user_id, key } = req.body;

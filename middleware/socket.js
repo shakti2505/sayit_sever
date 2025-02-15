@@ -16,7 +16,7 @@ export const setUpSocket = (io) => {
 
   // socket connection if room is available
   io.on("connection", (socket) => {
-    // join the room
+    // join the roomW
     socket.join(socket.room);
 
     // capturing "message" event from the triggerd by client and extracting data and saving messsages to database.
@@ -26,9 +26,10 @@ export const setUpSocket = (io) => {
         group: data.group,
         group_id: data.group_id,
         message: data.message,
+        iv:data.iv,
         name: data.name,
         sender_id: data.sender_id,
-        isRead: data.isRead,
+        isRead: data.isRead,  
         isReceived: true,
       });
 
