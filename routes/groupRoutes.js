@@ -12,17 +12,18 @@ import {
   getGroupUsers,
   storeUsersInGroup,
 } from "../controller/chatGroupUserController.js";
-import { getGroupChats, searchMessgesInGroup } from "../controller/chatsController.js";
+import {
+  getGroupChats,
+  searchMessgesInGroup,
+  updateMessageReadStatus,
+} from "../controller/chatsController.js";
 
 const router = express.Router();
 
 // chat group route
 // router.post("/create-chat-group", authMiddleware, (req, res) => createGroup(req, res, req.io));
 
-
 router.post("/create-chat-group", authMiddleware, createGroup);
-
-
 
 // getAllGroupOfUser
 
@@ -48,10 +49,17 @@ router.post("/create-chat-group-user", storeUsersInGroup);
 router.get("/get-group-chats/:group_id", getGroupChats);
 
 // generate link route
-router.post('/generate-group-link/:group_id', generate_group_link);
-
+router.post("/generate-group-link/:group_id", generate_group_link);
 
 // search messges in group route
-router.get('/search-messages', searchMessgesInGroup);
+router.get("/search-messages", searchMessgesInGroup);
+
+// update message status "is read" to true;
+
+router.patch(
+  "/update-message-status/:messageId",
+  authMiddleware,
+  updateMessageReadStatus
+);
 
 export default router;

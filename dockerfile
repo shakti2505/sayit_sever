@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20.18.3
 
 # Set environment to production
 ENV NODE_ENV=production

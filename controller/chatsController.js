@@ -13,7 +13,7 @@ export const getGroupChats = async (req, res) => {
       },
       { $sort: { _id: 1 } }, // Sort by date
     ]);
-   
+
     return res.status(200).json({ message: "chats found", data: chats });
   } catch (error) {
     console.log(error);
@@ -59,5 +59,23 @@ export const searchMessgesInGroup = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// update message status isRead
+
+export const updateMessageReadStatus = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    if (!messageId) {
+      return res.status(401).json({ message: "Message id not found" });
+    }
+
+    await groupChatModal.findByIdAndUpdate(messageId, { isRead: true });
+
+    return res.status(201).json({ message: "message status updated to true" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

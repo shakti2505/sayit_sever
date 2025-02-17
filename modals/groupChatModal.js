@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
-import UserModal from "./userModal.js";
+
+const isReadBy = new mongoose.Schema({
+  member_id: {
+    type: String,
+  },
+});
+const isReceivedBy = new mongoose.Schema({
+  member_id: {
+    type: String,
+  },
+});
 
 const groupChatSchema = new mongoose.Schema({
   sender_id: {
@@ -14,14 +24,12 @@ const groupChatSchema = new mongoose.Schema({
   iv: String,
   name: String,
   isRead: {
-    type: Boolean,
-    required: true,
-    default: false,
+    type: [isReadBy],
+    default: [],
   },
   isReceived: {
-    type: Boolean,
-    required: true,
-    default: false,
+    type: [isReceivedBy],
+    default: [],
   },
   createdAt: {
     type: Date,

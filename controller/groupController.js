@@ -39,7 +39,7 @@ export const createGroup = async (req, res) => {
       isAdmin: true,
     };
 
-    // pushing group creator deatails in teh member's array
+    // pushing group creator deatails in the member's array
     await selectedMembers.push(groupCreater);
 
     // creating the group with group member's array
@@ -56,8 +56,6 @@ export const createGroup = async (req, res) => {
       message: `WECOME TO THE ${NewGroup.name}...`,
       name: "system",
       sender_id: "system",
-      isRead: true,
-      isReceived: true,
     });
 
     // once group is created we are generating AES key, then to encrypt it with the public keys of group members and saving it with the group
@@ -68,11 +66,6 @@ export const createGroup = async (req, res) => {
     await ChatGroupModal.findByIdAndUpdate(NewGroup._id, {
       encryptAESKeyForGroup: encryptedAesKeysForGroupMembers,
     });
-    console.log(
-      "encryptedAesKeysForGroupMembers",
-      encryptedAesKeysForGroupMembers
-    );
-
     return res
       .status(201)
       .json({ message: "Group created successfully", data: NewGroup });
