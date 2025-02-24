@@ -39,5 +39,5 @@ const groupChatSchema = new mongoose.Schema({
 
 groupChatSchema.index({ createdAt: 1 });
 
-const groupChatModal = mongoose.model("Group chats", groupChatSchema);
+const groupChatModal = mongoose.model("GroupChats", groupChatSchema);
 export default groupChatModal;

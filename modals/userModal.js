@@ -12,8 +12,10 @@ const UserSchema = new mongoose.Schema({
   },
   public_key: {
     type: String,
-    default:'',
+    default: "",
   },
+  passwordHash: String,
+  saltHash: String,
   createdAt: {
     type: Date,
     default: new Date(),

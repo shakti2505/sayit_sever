@@ -33,5 +33,5 @@ const UserContactSschema = new mongoose.Schema({
   },
 });
 
-const UserContactModal = mongoose.model("User Contacts", UserContactSschema);
+const UserContactModal = mongoose.model("UserContacts", UserContactSschema);
 export default UserContactModal;

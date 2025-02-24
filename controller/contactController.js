@@ -1,6 +1,7 @@
 // Search user by name or email id
 import UserContactModal from "../modals/userContactsModal.js";
 import UserModal from "../modals/userModal.js";
+
 export const searchUser = async (req, res) => {
   try {
     const { name, email } = req.query;
@@ -85,7 +86,9 @@ export const getAllContactByUserId = async (req, res) => {
       return res.status(400).json({ message: "No user found" });
     }
 
-    const allContacts = await UserContactModal.find({ user_id: user._id });
+    const allContacts = await UserContactModal.find({
+      user_id: "67b32040fec0b2ffe40758b6",
+    });
     return res
       .status(200)
       .json({ message: "Contact found", data: allContacts });

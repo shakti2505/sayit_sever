@@ -45,7 +45,6 @@ export const createGroup = async (req, res) => {
     // creating the group with group member's array
     const NewGroup = await ChatGroupModal.create({
       name: body.name,
-      passcode: body.passcode,
       group_admin: user._id,
       members: selectedMembers,
     });
@@ -156,5 +155,49 @@ export const generate_group_link = (req, res) => {
     return res
       .status(500)
       .json({ message: "Internal Server error, Please try again!" });
+  }
+};
+
+// add new members to group
+export const addContactsToGroup = async (req, res) => {
+  try {
+    const { selectedContacts, groupId, encryptedAesKeysOfContacts } = req.body;
+    if (
+      selectedContacts.length === 0 ||
+      !groupId ||
+      encryptedAesKeysOfContacts.length === 0
+    ) {
+      return res.status(401).json({ message: "selected Contacts not found" });
+    }
+
+    const selectedMembers = req.body.selectedContacts.map(
+      ({ contact_id, contact_name, contact_image, contact_public_key }) => {
+        return {
+          member_id: contact_id,
+          member_name: contact_name,
+          member_image: contact_image,
+          publicKey: contact_public_key,
+        };
+      }
+    );
+
+    // updating the chat group memebers array
+    const newMembers = await ChatGroupModal.findOneAndUpdate(
+      { _id: groupId }, // The ID of the group you want to update
+      {
+        $addToSet: {
+          members: { $each: selectedMembers },
+          encryptAESKeyForGroup: { $each: encryptedAesKeysOfContacts },
+        },
+      }, // Add new members, $addToSet ensure ony unique members added $each allow multiple entry at once
+      { new: true } //
+    );
+
+    return res
+      .status(201)
+      .json({ message: "Members added successfully", data: newMembers });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

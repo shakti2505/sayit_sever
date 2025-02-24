@@ -20,7 +20,7 @@ const encryptAESKeyWithPublicKey = (aesKeyBuffer, UserPublicKey) => {
   const public_key = base64ToPEM(UserPublicKey);
 
   return crypto
-    .publicEncrypt(
+    .publicEncrypt( 
       {
         key: public_key,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, // Ensure correct padding

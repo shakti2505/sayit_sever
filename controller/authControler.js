@@ -1,9 +1,12 @@
 // auth controler
 import axios from "axios";
 import { oauth2Client } from "../utils/googleConfig.js";
-
 import UserModal from "../modals/userModal.js";
 import Jwt from "jsonwebtoken";
+import {
+  hashPassword,
+  verifyPassword,
+} from "../utils/encryption/HashPassword/hashPassword.js";
 
 const maxAge = 3 * 60 * 60;
 
@@ -59,5 +62,72 @@ export const savePubicKey = async (req, res) => {
     }
   } catch (error) {
     return res.status(500).json({ message: "Internal Server error" });
+  }
+};
+
+// login with user name and password
+export const signUpWithPassword = async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    // checking if user name and password exists
+    if (!username || !password || !email)
+      return res
+        .status(401)
+        .json({ message: "No username or password found!" });
+
+    //returning 409 status code if email already exists in the databse.
+    const isEmailExists = await UserModal.find({ email: email });
+    if (isEmailExists.length > 0)
+      return res.status(409).json({ message: "Email already exists" });
+
+    // hashing password before saving it to database, destructuring hash and salt to save in the database;
+    const { hash, salt } = await hashPassword(password);
+
+    // saving username, passwordHash, saltHash to the database,
+    await UserModal.create({
+      name: username,
+      passwordHash: hash,
+      saltHash: salt,
+      email: email,
+    });
+    return res.status(201).json({ message: "Account Created Successfully!" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const loginWithPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!password || !email)
+      return res
+        .status(401)
+        .json({ message: "No username or password found!" });
+    // extract user from using email
+    const existingUser = await UserModal.findOne({ email: email });
+    if (existingUser) {
+      // verifying password
+      const { passwordHash, saltHash } = existingUser;
+      const passwordMatch = await verifyPassword(
+        password,
+        passwordHash,
+        saltHash
+      );
+      if (passwordMatch) {
+        return res
+          .status(200)
+          .json({ message: "valid credentials, login successfully" });
+      } else {
+        return res
+          .status(401)
+          .json({ message: "Invalid password, Login failed" });
+      }
+    } else {
+      return res.status(401).json({ message: "Email Not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

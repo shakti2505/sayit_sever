@@ -17,9 +17,9 @@ export const setUpSocket = (io) => {
     next();
   });
 
-  // socket connection if room is available
+  // socket connection if room is available(entire circuit where all sockets are connected)
   io.on("connection", (socket) => {
-    // join the roomW
+    // join the room
     socket.join(socket.room);
 
     // capturing "message" event from the triggerd by client and extracting data and saving messsages to database.
@@ -50,6 +50,8 @@ export const setUpSocket = (io) => {
         isReceived: [{ member_id: data.id }],
       });
     });
+
+  
 
     socket.on("disconnect", () => {
       console.log("A user disconnected: ", socket.id);

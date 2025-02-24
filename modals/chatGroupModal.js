@@ -44,11 +44,6 @@ const chatGroup = new mongoose.Schema({
     ref: User,
     required: true,
   },
-  passcode: {
-    type: String,
-    required: true,
-    minLength: 6,
-  },
   group_picture: {
     type: String,
   },

@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  addContactsToGroup,
   createGroup,
   deleteGroup,
   generate_group_link,
@@ -43,6 +44,7 @@ router.delete("/delete-group/:id", authMiddleware, deleteGroup);
 // chat group Users
 router.get("/chat-group-users/:group_id", getGroupUsers);
 
+// store user in group
 router.post("/create-chat-group-user", storeUsersInGroup);
 
 // group chats route
@@ -61,5 +63,8 @@ router.patch(
   authMiddleware,
   updateMessageReadStatus
 );
+
+// add Contacts to group
+router.patch("/add-contacts-to-group", addContactsToGroup);
 
 export default router;
