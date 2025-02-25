@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    required: [true, "email is required"],
   },
   image: {
     type: String,
@@ -14,8 +15,12 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  passwordHash: String,
+  passwordHash: {
+    type: String,
+    required: [true, "password is required"],
+  },
   saltHash: String,
+  refreshToken: String,
   createdAt: {
     type: Date,
     default: new Date(),

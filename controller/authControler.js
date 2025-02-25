@@ -10,6 +10,48 @@ import {
 
 const maxAge = 3 * 60 * 60;
 
+const genrateAccessToken = (_id, email) => {
+  const accessToken = Jwt.sign(
+    { _id, email },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_TIMEOUT,
+    }
+  );
+  return accessToken;
+};
+
+const genrateRefreshTokenAndAccessToken = async (_id, email) => {
+  try {
+    // generate access token
+    const accessToken = Jwt.sign(
+      { _id, email },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: process.env.ACCESS_TOKEN_TIMEOUT,
+      }
+    );
+    // genrating refresh token
+    const refreshToken = Jwt.sign(
+      { _id, email },
+      process.env.REFRESH_TOKEN_SECRET,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_TIMEOUT,
+      }
+    );
+    // fetcing user
+    const user = await UserModal.findById(_id);
+    //saving generated refresh token
+    user.refreshToken = refreshToken;
+    // saving user object and with validation false to avoid passing required values
+    await user.save({ validateBeforeSave: false });
+    // returing refresh tokens
+    return { refreshToken, accessToken };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const googleLogin = async (req, res) => {
   try {
     const { code } = req.query;
@@ -21,7 +63,7 @@ export const googleLogin = async (req, res) => {
     const { email, name, picture } = userResponse.data;
     let user = await UserModal.findOne({ email: email });
     if (!user) {
-      user = await UserModal.create({
+      await UserModal.create({
         name: name,
         email: email,
         image: picture,
@@ -29,20 +71,30 @@ export const googleLogin = async (req, res) => {
     }
     const { _id } = user;
     // creating jwt token to pass it to the client
-    const token = Jwt.sign({ _id, email }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_TIMEOUT,
-    });
-    res.cookie("jwt", token, {
+    const { refreshToken, accessToken } =
+      await genrateRefreshTokenAndAccessToken(_id, email);
+    await UserModal.findById(id).select(
+      "-passwordHash -refreshToken -saltHash"
+    );
+    res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
       maxAge: maxAge * 5000,
     });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     return res
       .status(200)
-      .json({ message: "success", token, user, user_id: _id });
+      .cookie()
+      .json({ message: "success", accessToken, user, user_id: _id });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Internal Server error" });
   }
 };
@@ -97,6 +149,7 @@ export const signUpWithPassword = async (req, res) => {
   }
 };
 
+// login with email and password
 export const loginWithPassword = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -108,13 +161,28 @@ export const loginWithPassword = async (req, res) => {
     const existingUser = await UserModal.findOne({ email: email });
     if (existingUser) {
       // verifying password
-      const { passwordHash, saltHash } = existingUser;
+      const { passwordHash, saltHash, _id, email } = existingUser;
       const passwordMatch = await verifyPassword(
         password,
         passwordHash,
         saltHash
       );
       if (passwordMatch) {
+        // genrating jwt access & refresh token to send to client and save in cookies
+        const { refreshToken, accessToken } =
+          await genrateRefreshTokenAndAccessToken(_id, email);
+        res.cookie("accessToken", accessToken, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+          maxAge: maxAge * 5000,
+        });
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
         return res
           .status(200)
           .json({ message: "valid credentials, login successfully" });

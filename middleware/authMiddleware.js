@@ -1,18 +1,15 @@
 import jwt from "jsonwebtoken";
 
 const authMiddleware = async (req, res, next) => {
-  const authHeader = req.headers.authorization
-    ? req.headers.authorization
-    : req.cookies.jwt;
+  const authHeader = req.cookies.accessToken;
 
   if (authHeader == null || authHeader == undefined) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const token = authHeader;
+  const accesstoken = authHeader;
   //verify the token
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(accesstoken, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
       return res.status(401).json({ message: "Forbidden" });
     }
