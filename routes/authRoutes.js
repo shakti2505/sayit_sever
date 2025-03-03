@@ -1,7 +1,10 @@
 import express from "express";
 import {
+  addDeviceLinkKey,
   googleLogin,
   loginWithPassword,
+  logoutUser,
+  refreshAccessToken,
   savePubicKey,
   signUpWithPassword,
 } from "../controller/authControler.js";
@@ -20,4 +23,12 @@ router.post("/signup", signUpWithPassword);
 
 // Login With Password
 router.post("/login", loginWithPassword);
+
+// refresh access token
+router.post("/refresh-accessToken", refreshAccessToken);
+
+// logout user
+router.post("/logout", authMiddleware, logoutUser);
+
+router.post('/add-device-link-key', authMiddleware, addDeviceLinkKey);
 export default router;

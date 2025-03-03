@@ -2,12 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 import ChatGroupModal from "../modals/chatGroupModal.js";
 import UserModal from "../modals/userModal.js";
-import { io } from "../app.js";
 import groupChatModal from "../modals/groupChatModal.js";
-import {
-  encryptAESKeyForGroup,
-  generateAESkey,
-} from "../utils/encryption/generate_keys.js";
+import { encryptAESKeyForGroup } from "../utils/encryption/generate_keys.js";
+import { cachedWithRedis, getWithRedis } from "../utils/RedisCached.js";
 
 // create group
 export const createGroup = async (req, res) => {
@@ -78,12 +75,16 @@ export const createGroup = async (req, res) => {
 export const getAllGroupOfUser = async (req, res) => {
   try {
     const user = req.user;
-    // const groups = await ChatGroupModal.find({ group_admin: user._id }).sort({
-    //   createdAt: -1,
-    // });
+
+    // get value from redis
+    const cachedValue = await getWithRedis("AllGroupOfUser");
+    if (cachedValue)
+      return res.status(200).json({ groups: JSON.parse(cachedValue) });
+
     const groups = await ChatGroupModal.find({
       "members.member_id": user._id,
     });
+    await cachedWithRedis("AllGroupOfUser", groups);
 
     return res
       .status(200)
@@ -98,7 +99,16 @@ export const getAllGroupOfUser = async (req, res) => {
 export const getGroupById = async (req, res) => {
   try {
     const { id } = req.params;
+    const cachedValue = await getWithRedis("groupById");
+    if (cachedValue)
+      return res.status(200).json({
+        message: "Chat Group fetched successfully",
+        data: JSON.parse(cachedValue),
+      });
+
     const group = await ChatGroupModal.findById(id);
+    await cachedWithRedis("groupById", group);
+
     return res
       .status(200)
       .json({ message: "Chat Group fetched successfully", data: group });

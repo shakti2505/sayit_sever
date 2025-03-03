@@ -87,7 +87,7 @@ export const getAllContactByUserId = async (req, res) => {
     }
 
     const allContacts = await UserContactModal.find({
-      user_id: "67b32040fec0b2ffe40758b6",
+      user_id: user._id,
     });
     return res
       .status(200)

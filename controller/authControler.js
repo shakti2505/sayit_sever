@@ -7,19 +7,9 @@ import {
   hashPassword,
   verifyPassword,
 } from "../utils/encryption/HashPassword/hashPassword.js";
-
+import crypto from "crypto";
+import LinkDeviceModal from "../modals/linkedDeviceModal.js";
 const maxAge = 3 * 60 * 60;
-
-const genrateAccessToken = (_id, email) => {
-  const accessToken = Jwt.sign(
-    { _id, email },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: process.env.ACCESS_TOKEN_TIMEOUT,
-    }
-  );
-  return accessToken;
-};
 
 const genrateRefreshTokenAndAccessToken = async (_id, email) => {
   try {
@@ -61,19 +51,21 @@ export const googleLogin = async (req, res) => {
       `https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${result.tokens.access_token}`
     );
     const { email, name, picture } = userResponse.data;
+
     let user = await UserModal.findOne({ email: email });
     if (!user) {
-      await UserModal.create({
+      const newUser = new UserModal({
         name: name,
         email: email,
         image: picture,
       });
+      user = await newUser.save({ validateBeforeSave: false });
     }
     const { _id } = user;
     // creating jwt token to pass it to the client
     const { refreshToken, accessToken } =
       await genrateRefreshTokenAndAccessToken(_id, email);
-    await UserModal.findById(id).select(
+    await UserModal.findById(_id).select(
       "-passwordHash -refreshToken -saltHash"
     );
     res.cookie("accessToken", accessToken, {
@@ -95,6 +87,7 @@ export const googleLogin = async (req, res) => {
       .json({ message: "success", accessToken, user, user_id: _id });
   } catch (err) {
     console.log(err);
+
     res.status(500).json({ message: "Internal Server error" });
   }
 };
@@ -171,6 +164,11 @@ export const loginWithPassword = async (req, res) => {
         // genrating jwt access & refresh token to send to client and save in cookies
         const { refreshToken, accessToken } =
           await genrateRefreshTokenAndAccessToken(_id, email);
+
+        const loggedInUser = await UserModal.findById(_id).select(
+          "-passwordHash -saltHash -refreshToken"
+        );
+
         res.cookie("accessToken", accessToken, {
           httpOnly: true,
           secure: true,
@@ -183,9 +181,12 @@ export const loginWithPassword = async (req, res) => {
           sameSite: "None",
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
-        return res
-          .status(200)
-          .json({ message: "valid credentials, login successfully" });
+        return res.status(200).json({
+          message: "logged in successfully",
+          accessToken,
+          loggedInUser,
+          user_id: _id,
+        });
       } else {
         return res
           .status(401)
@@ -193,6 +194,124 @@ export const loginWithPassword = async (req, res) => {
       }
     } else {
       return res.status(401).json({ message: "Email Not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+// refresh access token
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const incomingRefreshToken =
+      req.body.refreshToken || req.cookies.refreshToken;
+    if (!incomingRefreshToken) {
+      return res.status(401).json({ message: "unauthorized request" });
+    }
+    // verify the refresh token
+    const decodedToken = Jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // fetchig user
+    const user = await UserModal.findById(decodedToken?._id);
+
+    // checking if user exist or not?
+    if (!user) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    // matching the complete incoming token and token saved in the database
+
+    if (incomingRefreshToken !== user.refreshToken) {
+      return res
+        .status(401)
+        .json({ message: "Refresh token is expired or used" });
+    }
+
+    // once all verification are done then generating new tokens
+    const { refreshToken, accessToken } =
+      await genrateRefreshTokenAndAccessToken(user._id, user.email);
+    // setting tokens in the database
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: maxAge * 5000,
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({
+      accessToken,
+      refreshToken: refreshToken,
+      message: "Access token refreshed",
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: error.messsage || "Invalid Refresh Token" });
+  }
+};
+
+// logout
+export const logoutUser = async (req, res) => {
+  try {
+    console.log(req.user);
+    // removing the refresh token of logged in user from the database
+    await UserModal.findByIdAndUpdate(
+      req.user._id,
+
+      {
+        $set: { refreshToken: "" },
+      },
+      { new: true }
+    );
+
+    const option = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .clearCookie("accessToken", option)
+      .clearCookie("refreshToken", option)
+      .json({ message: "loggoed Out successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+    console.log(error);
+  }
+};
+
+export const addDeviceLinkKey = async (req, res) => {
+  const { encryptedData, iv, salt } = req.body;
+  if (!encryptedData || !iv || !salt)
+    return res.status(401).json({ message: "No device Link key found" });
+  try {
+    // fetch the user
+    const user = await UserModal.findById(req.user._id);
+    if (user) {
+      const keyID = crypto.randomUUID();
+      const DeviceLinkData = await LinkDeviceModal.create({
+        deviceLinkKey: keyID,
+        deviceLinkEncryptedKey: encryptedData,
+        deviceLinkIv: iv,
+        deviceLinkSalt: salt,
+        user_id: user._id,
+      });
+      return res.status(201).json({
+        message: "Device Link key added successfully",
+        key: DeviceLinkData.deviceLinkKey,
+      });
+    } else {
+      return res.status(401).json({ message: "No user found" });
     }
   } catch (error) {
     console.log(error);

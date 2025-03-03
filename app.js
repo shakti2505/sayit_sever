@@ -73,6 +73,7 @@ app.use("/auth", authRouter);
 app.use("/api", groupRouter);
 app.use("/api", contactRouter);
 
+
 server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
