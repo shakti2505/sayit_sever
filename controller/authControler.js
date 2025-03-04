@@ -295,26 +295,47 @@ export const addDeviceLinkKey = async (req, res) => {
   if (!encryptedData || !iv || !salt)
     return res.status(401).json({ message: "No device Link key found" });
   try {
-    // fetch the user
-    const user = await UserModal.findById(req.user._id);
-    if (user) {
-      const keyID = crypto.randomUUID();
-      const DeviceLinkData = await LinkDeviceModal.create({
-        deviceLinkKey: keyID,
-        deviceLinkEncryptedKey: encryptedData,
-        deviceLinkIv: iv,
-        deviceLinkSalt: salt,
-        user_id: user._id,
+    // check if device link key exists
+    const existingKey = await LinkDeviceModal.findOne({
+      user_id: req.user._id,
+    });
+    if (existingKey)
+      return res.status(200).json({
+        message: "Device Link key Already created",
+        key: existingKey.deviceLinkKey,
       });
-      return res.status(201).json({
-        message: "Device Link key added successfully",
-        key: DeviceLinkData.deviceLinkKey,
-      });
-    } else {
-      return res.status(401).json({ message: "No user found" });
+
+    // if no key exists then fetch the user and create a new key
+    const keyID = crypto.randomUUID();
+    const DeviceLinkData = await LinkDeviceModal.create({
+      deviceLinkKey: keyID,
+      deviceLinkEncryptedKey: encryptedData,
+      deviceLinkIv: iv,
+      deviceLinkSalt: salt,
+      user_id: req.user._id,
+    });
+    return res.status(201).json({
+      message: "Device Link key added successfully",
+      key: DeviceLinkData.deviceLinkKey,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getDeviceLinkedKeyData = async (req, res) => {
+  try {
+    const { key } = req.query;
+    if (key) return res.status(401).json({ message: "No key found" });
+
+    // if key found
+    const res = await LinkDeviceModal.findOne({ user_id: req.user._id });
+    if (res.deviceLinkKey === key) {
+      return res.status(200).json(res);
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: error.message });
   }
 };

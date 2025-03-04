@@ -1,5 +1,4 @@
-import mongoose, { trusted } from "mongoose";
-import { stringify } from "querystring";
+import mongoose from "mongoose";
 
 const LinkDeiveSchema = new mongoose.Schema({
   user_id: {
