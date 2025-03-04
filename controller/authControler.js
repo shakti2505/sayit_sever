@@ -330,8 +330,8 @@ export const getDeviceLinkedKeyData = async (req, res) => {
     if (key) return res.status(401).json({ message: "No key found" });
 
     // if key found
-    const res = await LinkDeviceModal.findOne({ user_id: req.user._id });
-    if (res.deviceLinkKey === key) {
+    const res = await LinkDeviceModal.findOne({ deviceLinkKey: key });
+    if (res) {
       return res.status(200).json(res);
     }
   } catch (error) {

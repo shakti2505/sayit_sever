@@ -37,7 +37,6 @@ router.post("/add-device-link-key", authMiddleware, addDeviceLinkKey);
 //get data with device link key
 router.get(
   "/get-data-with-device-link-key",
-  authMiddleware,
   getDeviceLinkedKeyData
 );
 
