@@ -57,7 +57,7 @@ export const loginAfterLinkedDeviceSuccssfully = async (req, res) => {
   try {
     const { user_id } = req.body;
     if (!user_id) return res.status(400).json({ message: "No user id found" });
-    const user = await UserModal.findOne(user_id);
+    const user = await UserModal.findOne({_id:user_id});
     const { refreshToken, accessToken } =
       await genrateRefreshTokenAndAccessToken(user._id, user.email);
     res.cookie("accessToken", accessToken, {
