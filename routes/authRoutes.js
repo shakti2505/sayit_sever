@@ -1,7 +1,6 @@
 import express from "express";
 import {
-  addDeviceLinkKey,
-  getDeviceLinkedKeyData,
+
   googleLogin,
   loginWithPassword,
   logoutUser,
@@ -31,13 +30,6 @@ router.post("/refresh-accessToken", refreshAccessToken);
 // logout user
 router.post("/logout", authMiddleware, logoutUser);
 
-// add device link key
-router.post("/add-device-link-key", authMiddleware, addDeviceLinkKey);
 
-//get data with device link key
-router.get(
-  "/get-data-with-device-link-key",
-  getDeviceLinkedKeyData
-);
 
 export default router;

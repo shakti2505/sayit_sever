@@ -7,40 +7,11 @@ import {
   hashPassword,
   verifyPassword,
 } from "../utils/encryption/HashPassword/hashPassword.js";
-import crypto from "crypto";
-import LinkDeviceModal from "../modals/linkedDeviceModal.js";
+import { genrateRefreshTokenAndAccessToken } from "../utils/tokenGeneration/generateToken.js";
+
 const maxAge = 3 * 60 * 60;
 
-const genrateRefreshTokenAndAccessToken = async (_id, email) => {
-  try {
-    // generate access token
-    const accessToken = Jwt.sign(
-      { _id, email },
-      process.env.ACCESS_TOKEN_SECRET,
-      {
-        expiresIn: process.env.ACCESS_TOKEN_TIMEOUT,
-      }
-    );
-    // genrating refresh token
-    const refreshToken = Jwt.sign(
-      { _id, email },
-      process.env.REFRESH_TOKEN_SECRET,
-      {
-        expiresIn: process.env.REFRESH_TOKEN_TIMEOUT,
-      }
-    );
-    // fetcing user
-    const user = await UserModal.findById(_id);
-    //saving generated refresh token
-    user.refreshToken = refreshToken;
-    // saving user object and with validation false to avoid passing required values
-    await user.save({ validateBeforeSave: false });
-    // returing refresh tokens
-    return { refreshToken, accessToken };
-  } catch (error) {
-    console.log(error);
-  }
-};
+
 
 export const googleLogin = async (req, res) => {
   try {
@@ -263,7 +234,6 @@ export const refreshAccessToken = async (req, res) => {
 // logout
 export const logoutUser = async (req, res) => {
   try {
-    console.log(req.user);
     // removing the refresh token of logged in user from the database
     await UserModal.findByIdAndUpdate(
       req.user._id,
@@ -290,54 +260,3 @@ export const logoutUser = async (req, res) => {
   }
 };
 
-export const addDeviceLinkKey = async (req, res) => {
-  const { encryptedData, iv, salt } = req.body;
-  if (!encryptedData || !iv || !salt)
-    return res.status(401).json({ message: "No device Link key found" });
-  try {
-    // check if device link key exists
-    const existingKey = await LinkDeviceModal.findOne({
-      user_id: req.user._id,
-    });
-    if (existingKey)
-      return res.status(200).json({
-        message: "Device Link key Already created",
-        key: existingKey.deviceLinkKey,
-      });
-
-    // if no key exists then fetch the user and create a new key
-    const keyID = crypto.randomUUID();
-    const DeviceLinkData = await LinkDeviceModal.create({
-      deviceLinkKey: keyID,
-      deviceLinkEncryptedKey: encryptedData,
-      deviceLinkIv: iv,
-      deviceLinkSalt: salt,
-      user_id: req.user._id,
-    });
-    return res.status(201).json({
-      message: "Device Link key added successfully",
-      key: DeviceLinkData.deviceLinkKey,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-export const getDeviceLinkedKeyData = async (req, res) => {
-  try {
-    const { key } = req.query;
-    if (!key) {
-      return res.status(401).json({ message: "No key found" });
-    }
-
-    // if key found
-    const response = await LinkDeviceModal.findOne({ deviceLinkKey: key });
-    if (response) {
-      return res.status(200).json(response);
-    }
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: error.message });
-  }
-};
