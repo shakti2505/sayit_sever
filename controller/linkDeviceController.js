@@ -1,6 +1,8 @@
 import LinkDeviceModal from "../modals/linkedDeviceModal.js";
 import UserModal from "../modals/userModal.js";
 import crypto from "crypto";
+import { genrateRefreshTokenAndAccessToken } from "../utils/tokenGeneration/generateToken.js";
+
 export const addDeviceLinkKey = async (req, res) => {
   const { encryptedData, iv, salt } = req.body;
   if (!encryptedData || !iv || !salt)

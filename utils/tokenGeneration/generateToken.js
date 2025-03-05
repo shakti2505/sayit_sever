@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 export const genrateRefreshTokenAndAccessToken = async (_id, email) => {
     try {
       // generate access token
-      const accessToken = Jwt.sign(
+      const accessToken = jwt.sign(
         { _id, email },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -13,7 +13,7 @@ export const genrateRefreshTokenAndAccessToken = async (_id, email) => {
         }
       );
       // genrating refresh token
-      const refreshToken = Jwt.sign(
+      const refreshToken = jwt.sign(
         { _id, email },
         process.env.REFRESH_TOKEN_SECRET,
         {
