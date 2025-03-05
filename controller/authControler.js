@@ -327,7 +327,7 @@ export const addDeviceLinkKey = async (req, res) => {
 export const getDeviceLinkedKeyData = async (req, res) => {
   try {
     const { key } = req.query;
-    if (key) {
+    if (!key) {
       return res.status(401).json({ message: "No key found" });
     }
 
