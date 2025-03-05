@@ -59,9 +59,14 @@ export const loginAfterLinkedDeviceSuccssfully = async (req, res) => {
   try {
     const { user_id } = req.body;
     if (!user_id) return res.status(400).json({ message: "No user id found" });
-    const user = await UserModal.findOne({_id:user_id});
+
+    // fetching user
+    const user = await UserModal.findOne({ _id: user_id });
+    // generating refresh and access token
     const { refreshToken, accessToken } =
       await genrateRefreshTokenAndAccessToken(user._id, user.email);
+
+    // setting cookies
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
@@ -74,11 +79,14 @@ export const loginAfterLinkedDeviceSuccssfully = async (req, res) => {
       sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
+
+    // sending response
     return res
       .status(200)
       .cookie()
-      .json({ message: "success", accessToken, user, user_id: _id });
+      .json({ message: "success", accessToken, user, user_id: user_id });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: error.message });
   }
 };
