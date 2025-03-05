@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/authRoutes.js";
 import groupRouter from "./routes/groupRoutes.js";
 import contactRouter from "./routes/contactRoutes.js";
+import deviceLinkRouter from "./routes/deviceLinkRoutes.js";
 import connectDB from "./DB/connectDB.js";
 import "./modals/userModal.js";
 import { Server } from "socket.io";
@@ -72,7 +73,7 @@ app.use((req, res, next) => {
 app.use("/auth", authRouter);
 app.use("/api", groupRouter);
 app.use("/api", contactRouter);
-
+app.use("/api", deviceLinkRouter);
 
 server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
