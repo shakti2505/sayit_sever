@@ -1,12 +1,13 @@
 import express from "express";
 import {
-
+  createPassword,
   googleLogin,
   loginWithPassword,
   logoutUser,
   refreshAccessToken,
   savePubicKey,
   signUpWithPassword,
+  verifyPasswordForQRcodeGeneration,
 } from "../controller/authControler.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
@@ -30,6 +31,10 @@ router.post("/refresh-accessToken", refreshAccessToken);
 // logout user
 router.post("/logout", authMiddleware, logoutUser);
 
+// create password
+router.patch("/create-password", authMiddleware, createPassword);
 
+// verify password
+router.post("/verify-password", authMiddleware, verifyPasswordForQRcodeGeneration);
 
 export default router;

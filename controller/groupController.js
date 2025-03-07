@@ -77,9 +77,9 @@ export const getAllGroupOfUser = async (req, res) => {
     const user = req.user;
 
     // get value from redis
-    const cachedValue = await getWithRedis("AllGroupOfUser");
-    if (cachedValue)
-      return res.status(200).json({ groups: JSON.parse(cachedValue) });
+    // const cachedValue = await getWithRedis("AllGroupOfUser");
+    // if (cachedValue)
+    //   return res.status(200).json({ groups: JSON.parse(cachedValue) });
 
     const groups = await ChatGroupModal.find({
       "members.member_id": user._id,

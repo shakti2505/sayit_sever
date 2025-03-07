@@ -11,8 +11,6 @@ import { genrateRefreshTokenAndAccessToken } from "../utils/tokenGeneration/gene
 
 const maxAge = 3 * 60 * 60;
 
-
-
 export const googleLogin = async (req, res) => {
   try {
     const { code } = req.query;
@@ -260,3 +258,53 @@ export const logoutUser = async (req, res) => {
   }
 };
 
+export const createPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password)
+      return res.status(400).json({ message: "Please provide password" });
+
+    //hash password
+    const { hash, salt } = await hashPassword(password);
+
+    // fetch user
+    await UserModal.findByIdAndUpdate(req.user._id, {
+      $set: { passwordHash: hash, saltHash: salt },
+    });
+    return res.status(201).json({ message: "Password created successfully" });
+  } catch (error) {
+    console.log(error);
+    F;
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const verifyPasswordForQRcodeGeneration = async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password)
+      return res.status(400).json({ message: "No password found" });
+
+    // fetch user
+    const user = await UserModal.findById(req.user._id);
+    if (user) {
+      const { passwordHash, saltHash } = user;
+
+      // verify password
+      const passwordMatch = await verifyPassword(
+        password,
+        passwordHash,
+        saltHash
+      );
+      if (passwordMatch)
+        return res
+          .status(200)
+          .json({ message: "Password verified Successfully" });
+      else return res.status(401).json({ message: "Invalid Password" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

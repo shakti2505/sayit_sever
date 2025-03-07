@@ -13,7 +13,6 @@ export const genrateRefreshTokenAndAccessToken = async (_id, email) => {
           expiresIn: process.env.ACCESS_TOKEN_TIMEOUT,
         }
       );
-      console.log(accessToken);
       // genrating refresh token
       const refreshToken = jwt.sign(
         { _id, email },
@@ -22,8 +21,6 @@ export const genrateRefreshTokenAndAccessToken = async (_id, email) => {
           expiresIn: process.env.REFRESH_TOKEN_TIMEOUT,
         }
       );
-      console.log(refreshToken);
-
       // fetcing user
       const user = await UserModal.findById(_id);
       //saving generated refresh token
