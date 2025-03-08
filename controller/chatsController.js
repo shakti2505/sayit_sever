@@ -14,7 +14,7 @@ export const getGroupChats = async (req, res) => {
       { $sort: { _id: 1 } }, // Sort by date
     ]);
 
-    return res.status(200).json({ message: "chats found", data: chats });
+    return res.status(200).json(chats);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal Server error" });
