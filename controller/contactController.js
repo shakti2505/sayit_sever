@@ -55,7 +55,6 @@ export const addNewContact = async (req, res) => {
       !user._id ||
       !contact_id ||
       !contact_email ||
-      !contact_image ||
       !contact_name ||
       !contact_public_key
     ) {

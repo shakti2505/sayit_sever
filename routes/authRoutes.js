@@ -5,7 +5,7 @@ import {
   loginWithPassword,
   logoutUser,
   refreshAccessToken,
-  savePubicKey,
+  savePublicKey,
   signUpWithPassword,
   verifyPasswordForQRcodeGeneration,
 } from "../controller/authControler.js";
@@ -17,7 +17,7 @@ const router = express.Router();
 router.get("/google", googleLogin);
 
 // update public key
-router.patch("/update-public-key", authMiddleware, savePubicKey);
+router.patch("/update-public-key", authMiddleware, savePublicKey);
 
 // signup with email and password
 router.post("/signup", signUpWithPassword);

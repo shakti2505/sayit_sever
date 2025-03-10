@@ -61,7 +61,7 @@ export const googleLogin = async (req, res) => {
   }
 };
 
-export const savePubicKey = async (req, res) => {
+export const savePublicKey = async (req, res) => {
   try {
     const { public_key } = req.body;
     const user = req.user;

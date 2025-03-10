@@ -11,7 +11,10 @@ import deviceLinkRouter from "./routes/deviceLinkRoutes.js";
 import connectDB from "./DB/connectDB.js";
 import "./modals/userModal.js";
 import { Server } from "socket.io";
-import { setUpSocket } from "./middleware/socket.js";
+import {
+  setUpSocket,
+  SetUpSocketForOnetoOneChat,
+} from "./middleware/socket.js";
 import { createAdapter } from "@socket.io/redis-streams-adapter";
 import redisClient from "./utils/redis.config.js";
 
@@ -60,6 +63,7 @@ const io = new Server(server, {
   adapter: createAdapter(redisClient),
 });
 setUpSocket(io);
+SetUpSocketForOnetoOneChat(io);
 export { io };
 
 const PORT = process.env.PORT || 8080;

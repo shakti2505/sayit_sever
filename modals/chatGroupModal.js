@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import User from "./userModal.js";
-import UserModal from "./userModal.js";
 
 const memberSchema = new mongoose.Schema({
   member_id: {

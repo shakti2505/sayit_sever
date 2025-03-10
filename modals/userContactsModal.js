@@ -18,7 +18,6 @@ const UserContactSschema = new mongoose.Schema({
   },
   contact_image: {
     type: String,
-    required: true,
   },
   contact_email: {
     type: String,

@@ -58,6 +58,7 @@ export const createGroup = async (req, res) => {
     const encryptedAesKeysForGroupMembers = await encryptAESKeyForGroup(
       NewGroup.members
     );
+
     // saving the encrypted AES key of group members
     await ChatGroupModal.findByIdAndUpdate(NewGroup._id, {
       encryptAESKeyForGroup: encryptedAesKeysForGroupMembers,
@@ -75,7 +76,6 @@ export const createGroup = async (req, res) => {
 export const getAllGroupOfUser = async (req, res) => {
   try {
     const user = req.user;
-
     // get value from redis
     // const cachedValue = await getWithRedis("AllGroupOfUser");
     // if (cachedValue)
@@ -99,7 +99,7 @@ export const getAllGroupOfUser = async (req, res) => {
 export const getGroupById = async (req, res) => {
   try {
     const { id } = req.params;
-    const cachedValue = await getWithRedis("groupById");
+    const cachedValue = await getWithRedis(id);
     if (cachedValue)
       return res.status(200).json({
         message: "Chat Group fetched successfully",
@@ -107,7 +107,7 @@ export const getGroupById = async (req, res) => {
       });
 
     const group = await ChatGroupModal.findById(id);
-    await cachedWithRedis("groupById", group);
+    await cachedWithRedis(id, group);
 
     return res
       .status(200)

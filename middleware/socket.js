@@ -3,6 +3,7 @@ import groupChatModal from "../modals/groupChatModal.js";
 export const setUpSocket = (io) => {
   // current saved Message ID
   let current_saved_message_id;
+  let onlineUser = new Map();
 
   // middleware for hand shaking before creating socket connection
   io.use((socket, next) => {
@@ -51,10 +52,20 @@ export const setUpSocket = (io) => {
       });
     });
 
-  
-
     socket.on("disconnect", () => {
       console.log("A user disconnected: ", socket.id);
     });
   });
+};
+
+// online User
+
+export const SetUpSocketForOnetoOneChat = (io) => {
+  // io.on("connection", (socket) => {
+  //   console.log(`A user in connected ${socket.id}`);
+  //   socket.on("joinOneToOne", (sender_id) => {
+  //     onlineUser.set(sender_id, socket.id);
+  //     console.log(`User ${sender_id} is Online`);
+  //   });
+  // });
 };
