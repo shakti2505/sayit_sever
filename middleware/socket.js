@@ -38,9 +38,9 @@ export const setUpSocket = (io) => {
       });
       current_saved_message_id = newMessage._id;
       // sending acknowledgement to client after successfully receiving message.
-      callback({
-        status: "Message Received",
-      });
+      // callback({
+      //   // status: "Message Received",
+      // });
 
       // emitting the message to the room
       socket.to(socket.room).emit("message", data);
