@@ -23,7 +23,19 @@ export const setUpSocket = (io) => {
     // join the room
     socket.join(socket.room);
 
+    // caputring typing event 
+    socket.on("typing", (name)=>{
+      socket.to(socket.room).emit("isTyping", name);
+    })
+    // caputring not typing event 
+    socket.on("notTyping", (name)=>{
+      socket.to(socket.room).emit("notTyping", name);
+    })
+
+
+
     // capturing "message" event from the triggerd by client and extracting data and saving messsages to database.
+
     socket.on("message", async (data, callback) => {
       // socket.broadcast.emit("message", data);
       const newMessage = await groupChatModal.create({
