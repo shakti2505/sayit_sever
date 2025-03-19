@@ -26,7 +26,7 @@ router.post("/signup", signUpWithPassword);
 router.post("/login", loginWithPassword);
 
 // refresh access token
-router.post("/refresh-accessToken", refreshAccessToken);
+router.get("/refresh-accessToken", refreshAccessToken);
 
 // logout user
 router.post("/logout", authMiddleware, logoutUser);

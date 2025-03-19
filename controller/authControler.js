@@ -41,7 +41,8 @@ export const googleLogin = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: maxAge * 5000,
+      // maxAge: maxAge * 5000,
+      maxAge: 10000, // 10 seconds
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,

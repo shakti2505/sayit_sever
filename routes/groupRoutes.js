@@ -14,7 +14,7 @@ import {
   storeUsersInGroup,
 } from "../controller/chatGroupUserController.js";
 import {
-  getGroupChats,
+  getGroupChatsById,
   searchMessgesInGroup,
   updateMessageReadStatus,
 } from "../controller/chatsController.js";
@@ -48,7 +48,7 @@ router.get("/chat-group-users/:group_id", getGroupUsers);
 router.post("/create-chat-group-user", storeUsersInGroup);
 
 // group chats route
-router.get("/get-group-chats/:group_id", getGroupChats);
+router.get("/get-group-chats/:group_id", getGroupChatsById);
 
 // generate link route
 router.post("/generate-group-link/:group_id", generate_group_link);

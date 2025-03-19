@@ -1,17 +1,26 @@
 import groupChatModal from "../modals/groupChatModal.js";
 
-export const getGroupChats = async (req, res) => {
+export const getGroupChatsById = async (req, res) => {
   try {
     const { group_id } = req.params;
+    const { _page, _limit } = req.query;
+    const skip = (_page - 1) * _limit;
+
+    // count total chats
+
+    const totalCounts = await groupChatModal.countDocuments({
+      group_id: group_id,
+    });
+
+    if (skip >= totalCounts) {
+      return res.status(200).json([]);
+    }
+
     const chats = await groupChatModal.aggregate([
       { $match: { group_id: group_id } },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          messages: { $push: "$$ROOT" }, // Push all messages of that date
-        },
-      },
-      { $sort: { _id: 1 } }, // Sort by date
+      { $sort: { createdAt: -1 } }, // newest messages first
+      { $skip: skip },
+      { $limit: parseInt(_limit) },
     ]);
 
     return res.status(200).json(chats);
