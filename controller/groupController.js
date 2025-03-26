@@ -9,11 +9,11 @@ import { cachedWithRedis, getWithRedis } from "../utils/RedisCached.js";
 // create group
 export const createGroup = async (req, res) => {
   try {
-    const body = req.body;
+    const { selectedUsers, group_picture, name } = req.body;
     const user = req.user;
 
     // extracting selected members in a new array
-    const selectedMembers = req.body.selectedUsers.map(
+    const selectedMembers = selectedUsers.map(
       ({ contact_id, contact_name, contact_image, contact_public_key }) => {
         return {
           member_id: contact_id,
@@ -27,7 +27,7 @@ export const createGroup = async (req, res) => {
     // extracting logged in user
     const loggedInUser = await UserModal.findById(user._id);
 
-    // creating adming object to push in member's array
+    // creating admin object to push in member's array
     const groupCreater = {
       member_id: user._id,
       member_name: loggedInUser.name,
@@ -41,18 +41,19 @@ export const createGroup = async (req, res) => {
 
     // creating the group with group member's array
     const NewGroup = await ChatGroupModal.create({
-      name: body.name,
+      name,
       group_admin: user._id,
       members: selectedMembers,
+      group_picture,
     });
 
-    // saving welcome message to group
-    await groupChatModal.create({
-      group_id: NewGroup._id,
-      message: `WECOME TO THE ${NewGroup.name}...`,
-      name: "system",
-      sender_id: "system",
-    });
+    // // saving welcome message to group
+    // await groupChatModal.create({
+    //   group_id: NewGroup._id,
+    //   message: `WECOME TO THE ${NewGroup.name}...`,
+    //   name: "system",
+    //   sender_id: "system",
+    // });
 
     // once group is created we are generating AES key, then to encrypt it with the public keys of group members and saving it with the group
     const encryptedAesKeysForGroupMembers = await encryptAESKeyForGroup(
@@ -77,9 +78,9 @@ export const getAllGroupOfUser = async (req, res) => {
   try {
     const user = req.user;
     // get value from redis
-    // const cachedValue = await getWithRedis("AllGroupOfUser");
-    // if (cachedValue)
-    //   return res.status(200).json({ groups: JSON.parse(cachedValue) });
+    const cachedValue = await getWithRedis("AllGroupOfUser");
+    if (cachedValue)
+      return res.status(200).json({ groups: JSON.parse(cachedValue) });
 
     const groups = await ChatGroupModal.find({
       "members.member_id": user._id,
@@ -121,16 +122,29 @@ export const getGroupById = async (req, res) => {
 // update group
 export const updateGroup = async (req, res) => {
   try {
-    const { name, passcode } = req.body;
+    const { name, imageUrl } = req.body;
     const { id } = req.params;
-    const updatedGroup = await ChatGroupModal.findByIdAndUpdate(
-      id,
-      { $set: { name: name, passcode: passcode } },
-      { new: true } // return the updated document
-    );
-    return res
-      .status(201)
-      .json({ message: "Group updated successfully", data: updatedGroup });
+    if (name) {
+      const updatedGroup = await ChatGroupModal.findByIdAndUpdate(
+        id,
+        { $set: { name: name } },
+        { new: true } // return the updated document
+      );
+      return res
+        .status(201)
+        .json({ message: "Group updated successfully", data: updatedGroup });
+    }
+    if (imageUrl) {
+      const updatedGroup = await ChatGroupModal.findByIdAndUpdate(
+        id,
+        { $set: { group_picture: imageUrl } },
+        { new: true } // return the updated document
+      );
+
+      return res
+        .status(201)
+        .json({ message: "Group updated successfully", data: updatedGroup });
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
@@ -202,6 +216,9 @@ export const addContactsToGroup = async (req, res) => {
       }, // Add new members, $addToSet ensure ony unique members added $each allow multiple entry at once
       { new: true } //
     );
+
+    // updating redis cache
+    await cachedWithRedis("AllGroupOfUser", newMembers);
 
     return res
       .status(201)

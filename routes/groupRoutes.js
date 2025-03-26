@@ -34,8 +34,8 @@ router.get("/chat-groups", authMiddleware, getAllGroupOfUser);
 
 router.get("/chat-group/:id", getGroupById);
 
-// update group
-router.put("/chat-group-update/:id", authMiddleware, updateGroup);
+// update group name or image
+router.patch("/chat-group-update/:id", authMiddleware, updateGroup);
 
 // delete group
 

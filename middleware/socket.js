@@ -23,16 +23,14 @@ export const setUpSocket = (io) => {
     // join the room
     socket.join(socket.room);
 
-    // caputring typing event 
-    socket.on("typing", (name)=>{
+    // caputring typing event
+    socket.on("typing", (name) => {
       socket.to(socket.room).emit("isTyping", name);
-    })
-    // caputring not typing event 
-    socket.on("notTyping", (name)=>{
+    });
+    // caputring not typing event
+    socket.on("notTyping", (name) => {
       socket.to(socket.room).emit("notTyping", name);
-    })
-
-
+    });
 
     // capturing "message" event from the triggerd by client and extracting data and saving messsages to database.
 
@@ -47,6 +45,8 @@ export const setUpSocket = (io) => {
         sender_id: data.sender_id,
         isRead: [],
         isReceived: [],
+        isReply: data.isReply,
+        replyTo: data.replyTo ? data.replyTo : null,
       });
       current_saved_message_id = newMessage._id;
       // sending acknowledgement to client after successfully receiving message.

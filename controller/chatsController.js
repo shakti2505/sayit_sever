@@ -3,30 +3,37 @@ import groupChatModal from "../modals/groupChatModal.js";
 export const getGroupChatsById = async (req, res) => {
   try {
     const { group_id } = req.params;
-    const { _page, _limit } = req.query;
+    let { _page = 1, _limit = 10 } = req.query; // Set default values
+
+    _page = parseInt(_page);
+    _limit = parseInt(_limit);
     const skip = (_page - 1) * _limit;
 
-    // count total chats
+    // Ensure pagination values are valid
+    if (isNaN(_page) || _page < 1 || isNaN(_limit) || _limit < 1) {
+      return res.status(400).json({ message: "Invalid pagination parameters" });
+    }
 
-    const totalCounts = await groupChatModal.countDocuments({
-      group_id: group_id,
-    });
+    // Count total messages in the group
+    const totalCounts = await groupChatModal.countDocuments({ group_id });
 
+    // If skip is greater than total messages, return empty array
     if (skip >= totalCounts) {
       return res.status(200).json([]);
     }
 
-    const chats = await groupChatModal.aggregate([
-      { $match: { group_id: group_id } },
-      { $sort: { createdAt: -1 } }, // newest messages first
-      { $skip: skip },
-      { $limit: parseInt(_limit) },
-    ]);
+    // Fetch paginated chats
+    const chats = await groupChatModal
+      .find({ group_id })
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .skip(skip)
+      .limit(_limit)
+      .lean(); // Optimize performance by returning plain JS objects
 
     return res.status(200).json(chats);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal Server error" });
+    console.error("Error fetching group chats:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

@@ -18,7 +18,6 @@ const base64ToPEM = (base64Key) => {
 // encrypt the AES key wity user's public key
 const encryptAESKeyWithPublicKey = (aesKeyBuffer, UserPublicKey) => {
   const public_key = base64ToPEM(UserPublicKey);
-
   return crypto
     .publicEncrypt( 
       {
