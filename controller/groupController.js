@@ -5,6 +5,7 @@ import UserModal from "../modals/userModal.js";
 import groupChatModal from "../modals/groupChatModal.js";
 import { encryptAESKeyForGroup } from "../utils/encryption/generate_keys.js";
 import { cachedWithRedis, getWithRedis } from "../utils/RedisCached.js";
+import mongoose from "mongoose";
 
 // create group
 export const createGroup = async (req, res) => {
@@ -226,5 +227,44 @@ export const addContactsToGroup = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const addOrUpdateReaction = async (user_id, type, messageId) => {
+  try {
+    if (user_id && type && messageId) {
+      // finding the message with the reaction using msg id and user_id who reacts on message before
+      const message = await groupChatModal.findOne({
+        _id: messageId,
+        "reactions.user_id": user_id,
+      });
+      if (message) {
+        // User has already reacted -> update the existing reaction
+        await groupChatModal.updateOne(
+          { _id: messageId, "reactions.user_id": user_id },
+          {
+            $set: {
+              "reactions.$.type": type,
+            },
+          }
+        );
+      } else {
+        // User has not reacted yet -> push new reaction
+        const res = await groupChatModal.findByIdAndUpdate(
+          messageId,
+          {
+            $push: {
+              reactions: {
+                user_id: new mongoose.Types.ObjectId(user_id),
+                type,
+              },
+            },
+          },
+          { new: true }
+        );
+      }
+    }
+  } catch (error) {
+    console.log(error);
   }
 };

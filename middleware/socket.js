@@ -1,3 +1,4 @@
+import { addOrUpdateReaction } from "../controller/groupController.js";
 import groupChatModal from "../modals/groupChatModal.js";
 
 export const setUpSocket = (io) => {
@@ -62,6 +63,16 @@ export const setUpSocket = (io) => {
       await groupChatModal.findByIdAndUpdate(current_saved_message_id, {
         isReceived: [{ member_id: data.id }],
       });
+    });
+
+    // capturing event for react
+    socket.on("reactionToMessage", (data) => {
+      socket.to(socket.room).emit("reactionToMessage", data);
+
+      // saving the reaction to the database
+      const { user_id, type, messageId } = data;
+
+      addOrUpdateReaction(user_id, type, messageId);
     });
 
     socket.on("disconnect", () => {

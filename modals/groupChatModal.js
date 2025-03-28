@@ -12,6 +12,24 @@ const isReceivedBy = new mongoose.Schema({
   },
 });
 
+// reaction schema
+const ReactionSchema = new mongoose.Schema(
+  {
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
+    timestamp: { type: Date, default: Date.now },
+  },
+  { _id: false }
+); // Avoid creating a separate _id for each reaction
+
+// main message schema
 const groupChatSchema = new mongoose.Schema(
   {
     receiver_ids: [
@@ -44,7 +62,7 @@ const groupChatSchema = new mongoose.Schema(
       ref: "GroupChats",
       default: null,
     },
-   
+    reactions: [ReactionSchema],
     isRead: {
       type: [isReadBy],
       default: [],
