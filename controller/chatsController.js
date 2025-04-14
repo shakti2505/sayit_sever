@@ -14,7 +14,7 @@ export const getGroupChatsById = async (req, res) => {
       return res.status(400).json({ message: "Invalid pagination parameters" });
     }
 
-    // Count total messages in the group
+    // Count total messages in the groupw
     const totalCounts = await groupChatModal.countDocuments({ group_id });
 
     // If skip is greater than total messages, return empty array

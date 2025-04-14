@@ -32,6 +32,8 @@ const ReactionSchema = new mongoose.Schema(
 // main message schema
 const groupChatSchema = new mongoose.Schema(
   {
+    _id: { type: mongoose.Schema.Types.ObjectId, required: true }, // Explicitly define `_id`
+
     receiver_ids: [
       {
         type: mongoose.Schema.Types.ObjectId,

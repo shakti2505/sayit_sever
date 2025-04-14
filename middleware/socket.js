@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { addOrUpdateReaction } from "../controller/groupController.js";
 import groupChatModal from "../modals/groupChatModal.js";
 
@@ -36,8 +37,11 @@ export const setUpSocket = (io) => {
     // capturing "message" event from the triggerd by client and extracting data and saving messsages to database.
 
     socket.on("message", async (data, callback) => {
-      // socket.broadcast.emit("message", data);
-      const newMessage = await groupChatModal.create({
+      // emitting the message to the room
+      const message_id = new mongoose.Types.ObjectId().toHexString();
+      const newMessage = {
+        _id: message_id,
+        createdAt: data.createdAt,
         group: data.group,
         group_id: data.group_id,
         message: data.message,
@@ -48,15 +52,18 @@ export const setUpSocket = (io) => {
         isReceived: [],
         isReply: data.isReply,
         replyTo: data.replyTo ? data.replyTo : null,
-      });
-      current_saved_message_id = newMessage._id;
-      // sending acknowledgement to client after successfully receiving message.
-      // callback({
-      //   // status: "Message Received",
-      // });
+      };
+      // console.log(data);
 
-      // emitting the message to the room
-      socket.to(socket.room).emit("message", data);
+      socket.to(socket.room).emit("message", newMessage);
+      // socket.broadcast.emit("message", data);
+      const res = await groupChatModal.create(newMessage);
+      current_saved_message_id = res._id;
+      // sending acknowledgement to client after successfully receiving message.
+      callback({
+        status: "Message Received",
+        message_id,
+      });
     });
 
     socket.on("IsReceived", async (data) => {
@@ -67,6 +74,7 @@ export const setUpSocket = (io) => {
 
     // capturing event for react
     socket.on("reactionToMessage", (data) => {
+      socket.emit("reactionToMessage", data); // Emit to the sender
       socket.to(socket.room).emit("reactionToMessage", data);
 
       // saving the reaction to the database
