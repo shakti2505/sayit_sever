@@ -73,10 +73,6 @@ const groupChatSchema = new mongoose.Schema(
       type: [isReceivedBy],
       default: [],
     },
-    createdAt: {
-      type: Date,
-      default: new Date(),
-    },
   },
   { timestamps: true }
 );

@@ -41,7 +41,6 @@ export const setUpSocket = (io) => {
       const message_id = new mongoose.Types.ObjectId().toHexString();
       const newMessage = {
         _id: message_id,
-        createdAt: data.createdAt,
         group: data.group,
         group_id: data.group_id,
         message: data.message,
