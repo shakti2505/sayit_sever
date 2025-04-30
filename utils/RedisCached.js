@@ -1,4 +1,4 @@
-import redisClient from "./redis.config.js";
+import {redisClient} from "./redis.config.js";
 
 export const cachedWithRedis = async (key, value) => {
   await redisClient.set(key, JSON.stringify(value));

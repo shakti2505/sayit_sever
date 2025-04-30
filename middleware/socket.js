@@ -24,23 +24,26 @@ export const setUpSocket = (io) => {
   io.on("connection", (socket) => {
     // join the room
     socket.join(socket.room);
-
     // caputring typing event
-    socket.on("typing", (name) => {
-      socket.to(socket.room).emit("isTyping", name);
+    socket.on("typing", (data) => {
+      if (data.group_id === socket.room) {
+        socket.to(socket.room).emit("isTyping", data.name);
+      }
     });
-    // caputring not typing event
-    socket.on("notTyping", (name) => {
-      socket.to(socket.room).emit("notTyping", name);
+    // caputring notTyping event
+    socket.on("notTyping", (data) => {
+      if (data.group_id === socket.room) {
+        socket.to(socket.room).emit("notTyping", data.name);
+      }
     });
 
     // capturing "message" event from the triggerd by client and extracting data and saving messsages to database.
-
     socket.on("message", async (data, callback) => {
       // emitting the message to the room
       const message_id = new mongoose.Types.ObjectId().toHexString();
       const newMessage = {
         _id: message_id,
+        createdAt: new Date(),
         group: data.group,
         group_id: data.group_id,
         message: data.message,
